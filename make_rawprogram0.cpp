@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
+#include <errno.h>
 
 #ifdef _WIN32
 #include <conio.h>
@@ -28,6 +29,9 @@ char const *blacklist = "'";
 std::string getStart_sector(std::string fileName) {
 	unsigned start = fileName.find('_');
 	unsigned end = fileName.find('.');
+	if (start == std::string::npos) {
+		fprintf(stderr, "ERROR: '%s' does not specify the start sector, xml will be incomplete!", const_cast<char*>(fileName.c_str()));
+	}
 	return fileName.substr(start+1, end-start-1);
 }
 
@@ -53,11 +57,19 @@ int getNum_partition_sectors(std::string fileName) {
 
 std::string getLabel(std::string fileName) {
 	unsigned end = fileName.find('_');
-	return fileName.substr(0, end-0);
+	if (end == std::string::npos) {
+		fprintf(stderr, "ERROR: '%s' does not specify the label, xml will be incomplete!", const_cast<char*>(fileName.c_str()));
+	}
+	return fileName.substr(0, end);
 }
 
 
 int main() {
+	std::cout << "NOTE: This tool uses information contained in the file names after DZ extraction " << std::endl
+		<< "hence it's only suitable for LG devices. Make sure you don't rename the files from the DZ." << std::endl
+		<< "Name of the file should look like \"aboot_152576.bin\" where aboot is the label" << std::endl
+		<< "and the number specifies the start sector. This program reads those from a text file." << std::endl
+		<< "Please look at partitions_example.txt."<< std::endl;
 	std::cout << "Enter file path here > " << std::flush;
 	std::string fileName;
 	std::getline(std::cin, fileName);
